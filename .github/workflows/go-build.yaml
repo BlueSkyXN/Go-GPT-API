@@ -94,3 +94,10 @@ jobs:
         with:
           name: build_Go-GPT-API_${{ matrix.os }}_${{ matrix.build_type }}_v${{ env.COMMIT_MESSAGE }}
           path: dist/${{ matrix.os }}/GGA${env.suffix}${{ matrix.ext }}
+      
+      - name: Upload all Artifacts in the OS-specific directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: All_Artifacts_${{ matrix.os }}_${{ matrix.build_type }}_v${{ env.COMMIT_MESSAGE }}
+          path: dist/${{ matrix.os }}/
+
