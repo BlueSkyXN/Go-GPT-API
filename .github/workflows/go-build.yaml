@@ -64,18 +64,23 @@ jobs:
           go mod tidy
 
       - name: Build executable
+        shell: bash
         run: |
           echo "GOOS=${{ matrix.GOOS }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.GOARCH }}" >> $GITHUB_ENV
-          if [[ "${{ matrix.build_type }}" == "regular" ]]; then
-            go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./main.go
+          if [[ "${{ matrix.os }}" != "windows-2019" ]]; then
+            if [[ "${{ matrix.build_type }}" == "regular" ]]; then
+              go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./main.go
+            else
+              CGO_ENABLED=0 GOOS=${{ matrix.GOOS }} GOARCH=${{ matrix.GOARCH }} go build -a -ldflags '-extldflags "-static"' -o dist/${{ matrix.os }}/GGA_static${{ matrix.ext }} ./main.go
+            fi
           else
-            CGO_ENABLED=0 GOOS=${{ matrix.GOOS }} GOARCH=${{ matrix.GOARCH }} go build -a -ldflags '-extldflags "-static"' -o dist/${{ matrix.os }}/GGA_static${{ matrix.ext }} ./main.go
+            go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./main.go
           fi
-        shell: bash
 
       - name: Set build type suffix
         id: build_type_suffix
+        shell: bash
         run: |
           if [[ "${{ matrix.build_type }}" == "regular" ]]; then
             echo "::set-output name=suffix::''"
