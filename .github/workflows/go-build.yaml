@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "GOOS=${{ matrix.GOOS }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.GOARCH }}" >> $GITHUB_ENV
-          go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./...
+          go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./main.go
         shell: bash
 
       - name: Upload Artifacts
