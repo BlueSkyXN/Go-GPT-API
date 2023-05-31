@@ -6,11 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/BlueSkyXN/Go-GPT-API/api/chatgpt"
 	"github.com/BlueSkyXN/Go-GPT-API/api/platform"
-	"github.com/BlueSkyXN/Go-GPT-API/env"
 	"github.com/BlueSkyXN/Go-GPT-API/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -22,11 +21,10 @@ func main() {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.CheckHeaderMiddleware())
+	router.Use(middleware.LoggingMiddleware()) // add this line
 
 	setupChatGPTAPIs(router)
-
 	setupPlatformAPIs(router)
-
 	router.NoRoute(handleFallbackRoute)
 
 	port := os.Getenv("GO_CHATGPT_API_PORT")
