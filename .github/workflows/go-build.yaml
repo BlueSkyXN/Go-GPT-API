@@ -63,6 +63,16 @@ jobs:
           go mod download
           go mod tidy
 
+      - name: Set build type suffix
+        id: build_type_suffix
+        shell: bash
+        run: |
+          if [[ "${{ matrix.build_type }}" == "regular" ]]; then
+            echo "suffix=''" >> $GITHUB_ENV
+          else
+            echo "suffix='_static'" >> $GITHUB_ENV
+          fi
+
       - name: Build executable
         shell: bash
         run: |
@@ -78,15 +88,6 @@ jobs:
             go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }} ./main.go
           fi
 
-      - name: Set build type suffix
-        id: build_type_suffix
-        shell: bash
-        run: |
-          if [[ "${{ matrix.build_type }}" == "regular" ]]; then
-            echo "suffix=''" >> $GITHUB_ENV
-          else
-            echo "suffix='_static'" >> $GITHUB_ENV
-          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
