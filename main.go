@@ -10,6 +10,7 @@ import (
 	"github.com/BlueSkyXN/Go-GPT-API/api/platform"
 	"github.com/BlueSkyXN/Go-GPT-API/middleware"
 	"github.com/gin-gonic/gin"
+	_ "github.com/linweiyuan/go-chatgpt-api/env"
 )
 
 func init() {

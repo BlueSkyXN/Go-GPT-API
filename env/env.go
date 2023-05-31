@@ -1,7 +1,7 @@
 package env
 
 import (
-	"github.com/BlueSkyXN/Go-GPT-API"
+	"github.com/joho/godotenv"
 )
 
 //goland:noinspection GoUnhandledErrorResult
