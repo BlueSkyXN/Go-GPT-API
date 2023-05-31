@@ -13,10 +13,23 @@ import (
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 )
 
+var (
+	logger *log.Logger
+)
+
 func init() {
+	// Initialize the logger
+	file, err := os.OpenFile("app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	logger = log.New(file, "", log.LstdFlags)
+
+	// Initialize Gin
 	gin.ForceConsoleColor()
 	gin.SetMode(gin.ReleaseMode)
 }
+
 
 func main() {
 	router := gin.Default()

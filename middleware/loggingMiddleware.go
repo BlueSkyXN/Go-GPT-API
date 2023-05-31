@@ -2,13 +2,31 @@ package middleware
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+var (
+	logger *log.Logger
+)
+
+func init() {
+	// Initialize the logger
+	file, err := os.OpenFile("app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+
+	logger = log.New(file, "", log.LstdFlags)
+
+	// Initialize Gin
+	gin.ForceConsoleColor()
+	gin.SetMode(gin.ReleaseMode)
+}
 
 type responseWriter struct {
 	gin.ResponseWriter
@@ -22,25 +40,16 @@ func (w responseWriter) Write(b []byte) (int, error) {
 
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Open the log file
-		f, err := os.OpenFile("app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("error opening file: %v", err)
-		}
-		defer f.Close()
-
-		// Set the log output to the file
-		log.SetOutput(f)
 
 		// Read the request body
-		bodyBytes, err := ioutil.ReadAll(c.Request.Body)
+		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			log.Printf("Error reading body: %v", err)
+			logger.Printf("Error reading body: %v", err)
 			return
 		}
 
 		// Restore the body to its original state for the next middleware
-		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		// Get the request details
 		ip := c.ClientIP()
@@ -49,8 +58,16 @@ func LoggingMiddleware() gin.HandlerFunc {
 		path := c.Request.URL.Path
 
 		// Log the request details
-		log.Printf("Request details: IP: %s, Start Time: %s, Method: %s, Path: %s, Request Body: %s",
+		logger.Printf("Request details: IP: %s, Start Time: %s, Method: %s, Path: %s, Request Body: %s",
 			ip, startTime.Format(time.RFC1123), method, path, string(bodyBytes))
+
+		// Log the request headers
+		for name, values := range c.Request.Header {
+			// Loop over all values for the name.
+			for _, value := range values {
+				logger.Printf("Request header: %s: %s\n", name, value)
+			}
+		}
 
 		// Create our custom response writer
 		writer := &responseWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
@@ -68,7 +85,15 @@ func LoggingMiddleware() gin.HandlerFunc {
 		latency := time.Since(startTime)
 
 		// Log the response details
-		log.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
+		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
 			statusCode, latency, writer.body.String())
+
+		// Log the response headers
+		for name, values := range writer.Header() {
+			// Loop over all values for the name.
+			for _, value := range values {
+				logger.Printf("Response header: %s: %s\n", name, value)
+			}
+		}
 	}
 }
