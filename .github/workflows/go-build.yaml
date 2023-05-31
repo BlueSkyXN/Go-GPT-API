@@ -16,6 +16,10 @@ jobs:
             GOOS: linux
             GOARCH: amd64
             ext: ''
+          - os: ubuntu-20.04
+            GOOS: linux
+            GOARCH: amd64
+            ext: ''
           - os: windows-2019
             GOOS: windows
             GOARCH: amd64
