@@ -95,10 +95,6 @@ func LoggingMiddleware() gin.HandlerFunc {
 		// Calculate response time
 		latency := time.Since(startTime)
 
-		// Log the response details
-		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
-			statusCode, latency, writer.body.String())
-
 		filteredBody := &bytes.Buffer{}
 
 		lines := strings.Split(writer.body.String(), "\n")
@@ -107,6 +103,9 @@ func LoggingMiddleware() gin.HandlerFunc {
 				filteredBody.WriteString(line + "\n")
 			}
 		}
+		// Log the response details
+		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
+			statusCode, latency, filteredBody.String())
 
 		// Log the response headers
 		//for name, values := range writer.Header() {
