@@ -89,6 +89,22 @@ jobs:
             go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }} ./main.go
           fi
 
+      - name: Build executable2
+        shell: bash
+        run: |
+          echo "GOOS=${{ matrix.GOOS }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.GOARCH }}" >> $GITHUB_ENV
+          if [[ "${{ matrix.os }}" != "windows-2019" ]]; then
+            if [[ "${{ matrix.build_type }}" == "regular" ]]; then
+              go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }}${{ matrix.ext }} ./main.go
+            else
+              CGO_ENABLED=0 GOOS=${{ matrix.GOOS }} GOARCH=${{ matrix.GOARCH }} go build -a -ldflags '-extldflags "-static"' -o dist/${{ matrix.os }}/GGA${{ env.suffix }}${{ matrix.ext }} ./main.go
+            fi
+          else
+            go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }}${{ matrix.ext }} ./main.go
+          fi
+
+
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
