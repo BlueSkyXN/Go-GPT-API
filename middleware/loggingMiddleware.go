@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -97,6 +98,15 @@ func LoggingMiddleware() gin.HandlerFunc {
 		// Log the response details
 		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
 			statusCode, latency, writer.body.String())
+
+		filteredBody := &bytes.Buffer{}
+
+		lines := strings.Split(writer.body.String(), "\n")
+		for _, line := range lines {
+			if strings.Contains(line, `"status": "finished_successfully"`) {
+				filteredBody.WriteString(line + "\n")
+			}
+		}
 
 		// Log the response headers
 		//for name, values := range writer.Header() {
