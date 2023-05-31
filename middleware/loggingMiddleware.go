@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	logger       *log.Logger
-	headerFields = []string{"User-Agent", "Authorization"}
+	logger         *log.Logger
+	headerFields   = []string{"User-Agent", "Authorization"}
+	responseFields = []string{"Content-Length"}
 )
 
 func init() {
@@ -98,10 +99,19 @@ func LoggingMiddleware() gin.HandlerFunc {
 			statusCode, latency, writer.body.String())
 
 		// Log the response headers
-		for name, values := range writer.Header() {
-			// Loop over all values for the name.
-			for _, value := range values {
-				logger.Printf("Response header: %s: %s\n", name, value)
+		//for name, values := range writer.Header() {
+		// Loop over all values for the name.
+		//	for _, value := range values {
+		//		logger.Printf("Response header: %s: %s\n", name, value)
+		//	}
+		//}
+		// Log the response headers
+		for _, name := range responseFields {
+			values, ok := writer.Header()[name]
+			if ok {
+				for _, value := range values {
+					logger.Printf("Response header: %s: %s\n", name, value)
+				}
 			}
 		}
 	}
