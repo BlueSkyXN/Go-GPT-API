@@ -1,0 +1,55 @@
+name: Go Building
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-Go-GPT-API:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            GOOS: linux
+            GOARCH: amd64
+            ext: ''
+          - os: windows-2019
+            GOOS: windows
+            GOARCH: amd64
+            ext: '.exe'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
+
+      - name: Set commit message
+        id: set_commit
+        run: |
+          commit_message=$(git log --format=%B -1)
+          echo "COMMIT_MESSAGE=$commit_message" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Get dependencies
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Build executable
+        run: |
+          echo "GOOS=${{ matrix.GOOS }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.GOARCH }}" >> $GITHUB_ENV
+          go build -o dist/${{ matrix.os }}/GGA${{ matrix.ext }} ./...
+        shell: bash
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_Go-GPT-API_${{ matrix.os }}_v${{ env.COMMIT_MESSAGE }}
+          path: dist/${{ matrix.os }}/GGA${{ matrix.ext }}
