@@ -68,10 +68,11 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.build_type }}" == "regular" ]]; then
-            echo "suffix=''" >> $GITHUB_ENV
+            echo "suffix=" >> $GITHUB_ENV
           else
-            echo "suffix='_static'" >> $GITHUB_ENV
+            echo "suffix=_static" >> $GITHUB_ENV
           fi
+
 
       - name: Build executable
         shell: bash
