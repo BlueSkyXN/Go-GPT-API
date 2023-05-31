@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/ini.v1"
 )
 
 var (
-	logger         *log.Logger
-	headerFields   = []string{"User-Agent", "Authorization"}
-	responseFields = []string{"Content-Length"}
+	logger               *log.Logger
+	headerFields         = []string{"User-Agent", "Authorization"}
+	responseFields       = []string{"Content-Length"}
+	filterResponseBody bool
 )
 
 func init() {
@@ -29,6 +31,17 @@ func init() {
 	// Initialize Gin
 	gin.ForceConsoleColor()
 	gin.SetMode(gin.ReleaseMode)
+
+	// Read config.ini file
+	cfg, err := ini.Load("config.ini")
+	if err != nil {
+		log.Fatalf("Fail to read file: %v", err)
+	}	
+
+	
+	// Get FilterResponseBody value
+	filterResponseBody = cfg.Section("loggingMiddleware").Key("filter_response_body").MustBool(false)
+
 }
 
 type responseWriter struct {
@@ -99,13 +112,20 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		lines := strings.Split(writer.body.String(), "\n")
 		for _, line := range lines {
-			if strings.Contains(line, `"status": "finished_successfully"`) {
+			if filterResponseBody && strings.Contains(line, `"status": "finished_successfully"`) {
 				filteredBody.WriteString(line + "\n")
 			}
 		}
+
 		// Log the response details
-		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
-			statusCode, latency, filteredBody.String())
+		if filterResponseBody {
+			logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
+				statusCode, latency, filteredBody.String())
+		} else {
+			logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
+				statusCode, latency, writer.body.String())
+		}
+
 
 		// Log the response headers
 		//for name, values := range writer.Header() {
