@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	logger               *log.Logger
-	headerFields         = []string{"User-Agent", "Authorization"}
-	responseFields       = []string{"Content-Length"}
-	filterResponseBody bool
+	logger         *log.Logger
+	filterResponse bool
+	headerFields   []string
+	responseFields []string
 )
 
 func init() {
@@ -25,22 +25,17 @@ func init() {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-
 	logger = log.New(file, "", log.LstdFlags)
 
-	// Initialize Gin
-	gin.ForceConsoleColor()
-	gin.SetMode(gin.ReleaseMode)
-
-	// Read config.ini file
+	// Load configuration
 	cfg, err := ini.Load("config.ini")
 	if err != nil {
 		log.Fatalf("Fail to read file: %v", err)
-	}	
+	}
 
-	
-	// Get FilterResponseBody value
-	filterResponseBody = cfg.Section("loggingMiddleware").Key("filter_response_body").MustBool(false)
+	filterResponse = cfg.Section("loggingMiddleware").Key("filterResponse").MustBool(true)
+	headerFields = strings.Split(cfg.Section("loggingMiddleware").Key("headerFields").String(), ",")
+	responseFields = strings.Split(cfg.Section("loggingMiddleware").Key("responseFields").String(), ",")
 
 }
 
@@ -112,20 +107,18 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		lines := strings.Split(writer.body.String(), "\n")
 		for _, line := range lines {
-			if filterResponseBody && strings.Contains(line, `"status": "finished_successfully"`) {
+			if filterResponse && strings.Contains(line, `"status": "finished_successfully"`) {
 				filteredBody.WriteString(line + "\n")
 			}
 		}
-
 		// Log the response details
-		if filterResponseBody {
+		if filterResponse {
 			logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
 				statusCode, latency, filteredBody.String())
 		} else {
 			logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
 				statusCode, latency, writer.body.String())
 		}
-
 
 		// Log the response headers
 		//for name, values := range writer.Header() {
