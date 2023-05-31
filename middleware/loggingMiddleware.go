@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -84,15 +85,18 @@ func LoggingMiddleware() gin.HandlerFunc {
 		// Calculate response time
 		latency := time.Since(startTime)
 
-		// Log the response details
-		logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
-			statusCode, latency, writer.body.String())
+		// Only log the response details if the response body does not contain "status": "in_progress"
+		if !strings.Contains(writer.body.String(), "\"status\": \"in_progress\"") {
+			// Log the response details
+			logger.Printf("Response details: Status Code: %d, Latency: %v, Response Body: %s",
+				statusCode, latency, writer.body.String())
 
-		// Log the response headers
-		for name, values := range writer.Header() {
-			// Loop over all values for the name.
-			for _, value := range values {
-				logger.Printf("Response header: %s: %s\n", name, value)
+			// Log the response headers
+			for name, values := range writer.Header() {
+				// Loop over all values for the name.
+				for _, value := range values {
+					logger.Printf("Response header: %s: %s\n", name, value)
+				}
 			}
 		}
 	}
