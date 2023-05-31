@@ -70,15 +70,13 @@ jobs:
           echo "GOARCH=${{ matrix.GOARCH }}" >> $GITHUB_ENV
           if [[ "${{ matrix.os }}" != "windows-2019" ]]; then
             if [[ "${{ matrix.build_type }}" == "regular" ]]; then
-              go build -o dist/${{ matrix.os }}/GGA$SUFFIX ./main.go
+              go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }} ./main.go
             else
-              CGO_ENABLED=0 GOOS=${{ matrix.GOOS }} GOARCH=${{ matrix.GOARCH }} go build -a -ldflags '-extldflags "-static"' -o dist/${{ matrix.os }}/GGA${SUFFIX} ./main.go
+              CGO_ENABLED=0 GOOS=${{ matrix.GOOS }} GOARCH=${{ matrix.GOARCH }} go build -a -ldflags '-extldflags "-static"' -o dist/${{ matrix.os }}/GGA${{ env.suffix }} ./main.go
             fi
           else
-            go build -o dist/${{ matrix.os }}/GGA$SUFFIX ./main.go
+            go build -o dist/${{ matrix.os }}/GGA${{ env.suffix }} ./main.go
           fi
-
-
 
       - name: Set build type suffix
         id: build_type_suffix
@@ -94,11 +92,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build_Go-GPT-API_${{ matrix.os }}_${{ matrix.build_type }}_v${{ env.COMMIT_MESSAGE }}
-          path: dist/${{ matrix.os }}/GGA${env.suffix}${{ matrix.ext }}
-      
+          path: dist/${{ matrix.os }}/GGA${{ env.suffix }}${{ matrix.ext }}
+
       - name: Upload all Artifacts in the OS-specific directory
         uses: actions/upload-artifact@v3
         with:
           name: All_Artifacts_${{ matrix.os }}_${{ matrix.build_type }}_v${{ env.COMMIT_MESSAGE }}
           path: dist/${{ matrix.os }}/
-
