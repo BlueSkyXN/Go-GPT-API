@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
-	"github.com/linweiyuan/go-chatgpt-api/api/platform"
-	_ "github.com/linweiyuan/go-chatgpt-api/env"
-	"github.com/linweiyuan/go-chatgpt-api/middleware"
+	"github.com/BlueSkyXN/Go-GPT-API/api/chatgpt"
+	"github.com/BlueSkyXN/Go-GPT-API/api/platform"
+	"github.com/BlueSkyXN/Go-GPT-API/env"
+	"github.com/BlueSkyXN/Go-GPT-API/middleware"
 )
 
 func init() {
