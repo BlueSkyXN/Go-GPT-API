@@ -83,14 +83,15 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.build_type }}" == "regular" ]]; then
-            echo "::set-output name=suffix::''"
+            echo "suffix=''" >> $GITHUB_ENV
           else
-            echo "::set-output name=suffix::'_static'"
+            echo "suffix='_static'" >> $GITHUB_ENV
           fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build_Go-GPT-API_${{ matrix.os }}_${{ matrix.build_type }}_v${{ env.COMMIT_MESSAGE }}
-          path: dist/${{ matrix.os }}/GGA${{ steps.build_type_suffix.outputs.suffix }}${{ matrix.ext }}
+          path: dist/${{ matrix.os }}/GGA${{ env.suffix }}${{ matrix.ext }}
+
 
