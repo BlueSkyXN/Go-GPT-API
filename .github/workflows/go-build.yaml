@@ -2,9 +2,14 @@ name: Go Building
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'api/**'
+      - 'env/**'
+      - 'middleware/**'
+      - 'util/**'
+      - 'main.go'
   workflow_dispatch:
+
 
 jobs:
   build-Go-GPT-API:
