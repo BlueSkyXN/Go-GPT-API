@@ -17,6 +17,7 @@ var (
 	filterResponse bool
 	headerFields   []string
 	responseFields []string
+	loggingEnabled bool
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	filterResponse = cfg.Section("loggingMiddleware").Key("filterResponse").MustBool(true)
 	headerFields = strings.Split(cfg.Section("loggingMiddleware").Key("headerFields").String(), ",")
 	responseFields = strings.Split(cfg.Section("loggingMiddleware").Key("responseFields").String(), ",")
+	loggingEnabled = cfg.Section("loggingMiddleware").Key("loggingEnabled").MustBool(true)
 
 }
 
@@ -51,7 +53,11 @@ func (w responseWriter) Write(b []byte) (int, error) {
 
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		// 如果日志记录被关闭，直接返回
+		if !loggingEnabled {
+			c.Next()
+			return
+		}
 		// Read the request body
 		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
